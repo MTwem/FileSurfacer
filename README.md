@@ -1,65 +1,56 @@
 # FileSurfacer
 
-A Python utility that recursively copies all files from a directory and its subdirectories into a single destination folder.
+A small Python utility that gathers all files under a source directory (recursively) and copies them into a single destination folder by default.
 
-## Description
+## Key behavior
 
-FileSurfacer flattens nested directory structures by extracting all files from a source folder and its subdirectories and placing them into a single destination folder. This is useful for:
+- By default the tool *flattens* all files into one folder named "<source> ReOrganised" placed adjacent to the source input.
+- Use `--preserve-structure` to preserve subdirectory layout under the destination.
+- When a filename collision occurs in the destination, the script appends a numeric suffix (e.g. `_1`) to avoid overwriting.
+- The script accepts Windows-style paths (e.g. `C:\Users\...`) and will translate them to WSL `/mnt/c/...` when appropriate.
 
-- Collecting media files scattered across multiple folders
-- Consolidating documents from complex directory hierarchies
-- Preparing files for batch processing that expects a flat structure
+## Requirements
 
-## Installation
-
-No external dependencies required. Just needs Python 3.
-
-```bash
-python3 FileSurfacer.py <source_directory> [destination_directory]
-```
+- Python 3 (no third-party packages required)
 
 ## Usage
 
-### Basic Usage
-
-Copy all files from a directory to a new "ReOrganised" folder:
-
+Basic (flatten into `<source> ReOrganised`):
 ```bash
 python3 FileSurfacer.py "/path/to/source"
 ```
 
-This creates a new folder named `source ReOrganised` in the same location.
-
-### With Custom Destination
-
-Specify a custom destination folder:
-
+Preserve the source directory structure under the destination:
 ```bash
-python3 FileSurfacer.py "/path/to/source" "/path/to/destination"
+python3 FileSurfacer.py "/path/to/source" "/path/to/destination" --preserve-structure
 ```
 
-## Examples
+Windows / WSL examples
 
-**Example 1: Collect audiobooks**
-```bash
-python3 FileSurfacer.py "/home/user/Audiobooks/2024"
+- Run from native Windows PowerShell (use `python` or `py`):
+```powershell
+python "C:\path\to\FileSurfacer.py" "C:\Users\<USER>\Desktop\ExampleFolder"
 ```
-All audio files from nested folders are copied to `/home/user/Audiobooks/2024 ReOrganised`.
 
-**Example 2: Consolidate with custom destination**
+- Run from WSL (the script will translate `C:\...` to `/mnt/c/...` when available):
 ```bash
-python3 FileSurfacer.py "/home/user/Documents" "/home/user/AllDocuments"
+python3 /home/<USER>/FileSurfacer/FileSurfacer.py "C:\Users\<USER>\Desktop\ExampleFolder"
 ```
-All files are flattened into `/home/user/AllDocuments`.
 
-## Arguments
+## Options
 
-- `source` (required): Source directory path
-- `destination` (optional): Destination directory path. If not provided, defaults to source directory + " ReOrganised"
+- `--preserve-structure`: keep the source directory layout inside the destination instead of flattening.
 
 ## Notes
 
-- Files are copied recursively from all subdirectories
-- The original directory structure is not preserved
-- If the destination folder doesn't exist, it will be created automatically
-- Files are copied with their original metadata preserved (`shutil.copy2`)
+- By default the destination is computed from the raw source input as `<source> ReOrganised` adjacent to the original folder (so it won't create a `C:\...` folder inside your Linux home).
+- If you prefer skipping duplicate files instead of renaming, or want a `--dry-run` flag to preview actions, open an issue or request the change.
+
+## Example
+
+Flatten a Desktop folder into a single collection (WSL or Windows):
+```bash
+python3 FileSurfacer.py "C:\Users\<USER>\Desktop\ExampleFolder"
+```
+
+This will create `C:\Users\<USER>\Desktop\ExampleFolder ReOrganised` (or the WSL-translated equivalent) and copy all files into it.
